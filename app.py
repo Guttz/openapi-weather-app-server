@@ -1,5 +1,6 @@
 from datetime import datetime
 from flask import Flask, request
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc
 from flasgger import Swagger
@@ -8,8 +9,15 @@ from requests import get
 import json
 
 app = Flask(__name__)
+
+#Setting CORS so it allows requests from our Angular app in localhost:4200
+CORS(app, resources={r"*": {"origins": "http://localhost:4200"}})
+
+#SQL Database configuration 
 app.config['SECRET_KEY'] = 'bookatruckinseconds'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///weather_log.db'
+
+#Starting the database engine variable and Swagger API Docs endpoint
 db = SQLAlchemy(app)
 swagger = Swagger(app)
 
@@ -21,13 +29,12 @@ class Weather_Log(db.Model):
     date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
 
     def __repr__(self):
-        return f'{{"date":"{self.date}", "address":"{self.address}", "weather":"{self.weather}"}}'
+        return f'{{"date":"{self.date}", "address":"{self.address}", "weather":"{self.weather}", "icon":"{self.icon}"}}'
 
 db.create_all()
 
 API_URL = "http://api.openweathermap.org/data/2.5/weather"
 API_KEY = "b65335b39eb9189980121a51c105c90a"
-
 
 @app.route("/weather", methods=['GET'])
 def get_weather():
@@ -72,7 +79,7 @@ def get_weather():
           $ref: '#/definitions/Weather'
         examples:
           weather: {"temp": 21.17, "pressure": 1015, "humidity": 83,
-          "temp_min": 15.56, "temp_max": 24}
+          "temp_min": 15.56, "temp_max": 24, "icon": "01d"}
       404:
         description: The specified city wasn't found
         schema:
@@ -88,15 +95,18 @@ def get_weather():
         params['zip'] = request.args.get(
             'zipCode') + "," + request.args.get('countryCode')
 
-    weather_response = get(url=API_URL, params=params)
+    weather_response = get(url=API_URL, params=params).json()  
+    print(weather_response)
+    print(type(weather_response))
 
-    if weather_response.json()['cod'] == 200:
-        return json.dumps(weather_response.json()['main']), 200
+    if weather_response['cod'] == 200:
+        weather_response['main']['icon'] = weather_response['weather'][0]['icon']
+        return json.dumps(weather_response['main']), 200
     else:
-        return json.dumps(weather_response.json()), 404
+        return json.dumps(weather_response), 404
 
 
-@app.route("/searches", methods=['GET'])
+@app.route("/searches", methods=['GET', 'OPTIONS'])
 def get_searches():
     """Endpoint that returns the searches already executed
     ---    
@@ -124,7 +134,7 @@ def get_searches():
         examples: [{"date":"2019-03-16 19:50:50.155235", "address":"Florianopólis",
         "weather":21.23, "icon":"04d.png"}]
     """
-    return str(Weather_Log.query.all())
+    return str(Weather_Log.query.order_by(Weather_Log.date.desc()).all())
 
 
 @app.route("/searches", methods=['POST'])
