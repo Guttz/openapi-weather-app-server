@@ -5,9 +5,9 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import exc
 from flasgger import Swagger
 from requests import get
-
 import json
 
+#Declaring our Flask application
 app = Flask(__name__)
 
 #Setting CORS so it allows requests from our Angular app in localhost:4200
@@ -20,22 +20,26 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///weather_log.db'
 #Starting the database engine variable and Swagger API Docs endpoint
 db = SQLAlchemy(app)
 swagger = Swagger(app)
-
-class Weather_Log(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    weather = db.Column(db.Float, nullable=False)
-    icon = db.Column(db.String(8), nullable=False)
-    address = db.Column(db.String(200), unique=True, nullable=False)
-    date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
-
-    def __repr__(self):
-        return f'{{"date":"{self.date}", "address":"{self.address}", "weather":"{self.weather}", "icon":"{self.icon}"}}'
-
 db.create_all()
 
+#Weather API informaton and credentials
 API_URL = "http://api.openweathermap.org/data/2.5/weather"
 API_KEY = "b65335b39eb9189980121a51c105c90a"
 
+"""MODELS Section, below you can find all the database models used in this application """
+class Weather_Log(db.Model):
+    """Model that represents a Weather Log inserted in the database"""
+    id = db.Column(db.Integer, primary_key=True)
+    weather = db.Column(db.Float, nullable=False)
+    icon = db.Column(db.String(8), nullable=False)
+    address = db.Column(db.String(200), unique=False, nullable=False)
+    date = db.Column(db.DateTime(), nullable=False, default=datetime.utcnow())
+
+    def __repr__(self):
+        return f'{{"date":"{self.date}", "address":"{self.address}",\
+          "weather":"{self.weather}", "icon":"{self.icon}"}}'
+
+"""ENDPOINTS Section, below you can find all the database models used in this application """
 @app.route("/weather", methods=['GET'])
 def get_weather():
     """Endpoint that returns the weather for given Zip Code and Country Code as input
@@ -95,9 +99,7 @@ def get_weather():
         params['zip'] = request.args.get(
             'zipCode') + "," + request.args.get('countryCode')
 
-    weather_response = get(url=API_URL, params=params).json()  
-    print(weather_response)
-    print(type(weather_response))
+    weather_response = get(url=API_URL, params=params).json()
 
     if weather_response['cod'] == 200:
         weather_response['main']['icon'] = weather_response['weather'][0]['icon']
@@ -199,10 +201,10 @@ def post_searches():
         body = json.loads(body)
     except Exception as exception:
         print(exception)
-        return '{"cod":"400", "message":"invalid request"}', 400
+        return '{"cod":"400", "message":"invalid body format"}', 400
 
     if not body['weather'] or not body['icon'] or not body['address']:
-        return '{"cod":"400", "message":"invalid request"}', 400
+        return '{"cod":"400", "message":"invalid or missing parameters"}', 400
 
     new_weatherLog = Weather_Log(weather=body['weather'], icon=body['icon'], address=body['address'])
     db.session.add(new_weatherLog)
