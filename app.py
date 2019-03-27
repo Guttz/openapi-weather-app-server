@@ -94,7 +94,7 @@ def get_weather():
         examples:
           failed: {"cod":"404","message":"city not found"}
     """
-    params = {'zip': "88000-000,br", 'APPID': API_KEY, 'units': "metric"}
+    params = {'zip': "88000-000,br", 'APPID': API_KEY, 'units': "imperial", }
 
     if not request.args.get('zipCode') or not request.args.get('countryCode'):
         return '{"cod":"403", "message":"invalid request"}', 400
