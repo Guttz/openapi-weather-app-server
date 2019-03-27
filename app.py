@@ -20,7 +20,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///weather_log.db'
 #Starting the database engine variable and Swagger API Docs endpoint
 db = SQLAlchemy(app)
 swagger = Swagger(app)
-db.create_all()
+
 
 #Weather API informaton and credentials
 API_URL = "http://api.openweathermap.org/data/2.5/weather"
@@ -38,6 +38,9 @@ class Weather_Log(db.Model):
     def __repr__(self):
         return f'{{"date":"{self.date}", "address":"{self.address}",\
           "weather":"{self.weather}", "icon":"{self.icon}"}}'
+
+#Create the database with the above classes
+db.create_all()
 
 """ENDPOINTS Section, below you can find all the database models used in this application """
 @app.route("/weather", methods=['GET'])

@@ -6,7 +6,7 @@ class BaseTestCase(unittest.TestCase):
     # Setting up the application to be tested
     def setUp(self):
         app.config['SECRET_KEY'] = 'bookatruckinseconds'
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tests/test_weather_log.db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test_weather_log.db'
         self.app = app.test_client()
 
     # Executed after each test, nothing necessary for now
