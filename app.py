@@ -21,7 +21,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///weather_log.db'
 db = SQLAlchemy(app)
 swagger = Swagger(app)
 
-
 #Weather API informaton and credentials
 API_URL = "http://api.openweathermap.org/data/2.5/weather"
 API_KEY = "b65335b39eb9189980121a51c105c90a"
