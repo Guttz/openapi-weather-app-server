@@ -1,5 +1,5 @@
-# Loadsmart Weather Application
-This is the backend for a weather web application/coding task for Loadsmart. It's a Flask based application with a SQL Database, the interface between the two is made with SQLAlchemy, a ORM(Object Relational Mapping) tool for python. This app was published with Open API, so there's an Endpoint for documentation/api console.
+# OpenAPI Weather Application
+This is a Flask based application with a SQL Database, the interface between the two is made with SQLAlchemy, a ORM(Object Relational Mapping) tool for python. This app was published with Open API, so there's an Endpoint for documentation/api console.
 
 ## Requirements
 - Python 3.6.7+
